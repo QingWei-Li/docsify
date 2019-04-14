@@ -22,9 +22,11 @@ function getAlias(path, alias, last) {
 }
 
 function getFileName(path, ext) {
-  return new RegExp(`\\.(${ext.replace(/^\./, '')}|html)$`, 'g').test(path) ?
+  return /\.\w+$/.test(path) ?
     path :
-    /\/$/g.test(path) ? `${path}README${ext}` : `${path}${ext}`
+    /\/$/g.test(path) ?
+      `${path}README${ext}` :
+      `${path}${ext}`
 }
 
 export class History {

@@ -175,30 +175,10 @@ export function renderMixin(proto) {
     }
     dom.toggleClass(el, 'add', 'show')
 
-    let html = this.coverIsHTML ? text : this.compiler.cover(text)
+    let html = this.compiler.cover(text, this.coverIsHTML)
 
-    const m = html
-      .trim()
-      .match('<p><img.*?data-origin="(.*?)"[^a]+alt="(.*?)">([^<]*?)</p>$')
+    this._renderTo('.cover-placeholder', html, true)
 
-    if (m) {
-      if (m[2] === 'color') {
-        el.style.background = m[1] + (m[3] || '')
-      } else {
-        let path = m[1]
-
-        dom.toggleClass(el, 'add', 'has-mask')
-        if (!isAbsolutePath(m[1])) {
-          path = getPath(this.router.getBasePath(), m[1])
-        }
-        el.style.backgroundImage = `url(${path})`
-        el.style.backgroundSize = 'cover'
-        el.style.backgroundPosition = 'center center'
-      }
-      html = html.replace(m[0], '')
-    }
-
-    this._renderTo('.cover-main', html)
     sticky()
   }
 
@@ -228,8 +208,9 @@ export function initRender(vm) {
     if (config.repo) {
       html += tpl.corner(config.repo)
     }
+
     if (config.coverpage) {
-      html += tpl.cover()
+      html += '<div class=cover-placeholder></div>'
     }
 
     if (config.logo) {

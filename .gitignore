@@ -3,5 +3,6 @@
 /themes/*
 !.gitkeep
 node_modules
-/lib/
+lib
 .idea
+

@@ -321,6 +321,9 @@ body.sticky
   border-bottom 1px solid #eee
   margin 2em 0
 
+.markdown-section summary
+  cursor pointer
+
 .markdown-section iframe
   border 1px solid #eee
   /* fix horizontal overflow on iOS Safari */
@@ -351,6 +354,7 @@ body.sticky
     background-color #f8f8f8
 
 .markdown-section p.tip
+.markdown-section .docsify-tip
   background-color #f8f8f8
   border-bottom-right-radius 2px
   border-left 4px solid #f66
@@ -382,8 +386,22 @@ body.sticky
     color $color-text
 
 .markdown-section p.warn
+.markdown-section .docsify-warn
   background rgba($color-primary, 0.1)
   border-radius 2px
+  padding 1rem
+  margin: 2em 0
+
+.markdown-section .docsify-success
+  background rgba(#42b983, 0.1)
+  border-radius 2px
+  padding 1rem
+  margin: 2em 0
+
+.markdown-section .docsify-error
+  background rgba(#f66, 0.1)
+  border-radius 2px
+  margin: 2em 0
   padding 1rem
 
 .markdown-section ul.task-list > li

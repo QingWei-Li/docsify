@@ -22,7 +22,7 @@ function mainTpl(config) {
     html += tpl.corner(config.repo)
   }
   if (config.coverpage) {
-    html += tpl.cover()
+    html += '<!--cover-->'
   }
 
   html += tpl.main(config)
@@ -31,12 +31,13 @@ function mainTpl(config) {
 }
 
 export default class Renderer {
-  constructor({template, config, cache}) {
+  constructor({template, config, cache, path}) {
     this.html = template
     this.config = config = Object.assign({}, config, {
       routerMode: 'history'
     })
     this.cache = cache
+    this.path = path
 
     this.router = new AbstractHistory(config)
     this.compiler = new Compiler(config, this.router)
@@ -52,9 +53,19 @@ export default class Renderer {
   }
 
   _getPath(url) {
-    const file = this.router.getFile(url)
+    const path = resolve(this.path, url)
+    const file = this.router.getFile(path)
+    return file
+  }
 
-    return isAbsolutePath(file) ? file : cwd(`./${file}`)
+  async render(url) {
+    const content = await this.renderToString(url)
+
+    return {
+      content,
+      url: this.router.parse(url).path,
+      path: this._getPath(url)
+    }
   }
 
   async renderToString(url) {
@@ -66,32 +77,35 @@ export default class Renderer {
 
     if (loadSidebar) {
       const name = loadSidebar === true ? '_sidebar.md' : loadSidebar
-      const sidebarFile = this._getPath(resolve(url, `./${name}`))
+      const sidebarFile = this._getPath(resolvePathname(name, url))
       this._renderHtml('sidebar', await this._render(sidebarFile, 'sidebar'))
     }
 
     if (loadNavbar) {
       const name = loadNavbar === true ? '_navbar.md' : loadNavbar
-      const navbarFile = this._getPath(resolve(url, `./${name}`))
+      const navbarFile = this._getPath(resolvePathname(name, url))
       this._renderHtml('navbar', await this._render(navbarFile, 'navbar'))
     }
 
     if (coverpage) {
-      let path = null
-      if (typeof coverpage === 'string') {
-        if (url === '/') {
-          path = coverpage
+      let name = null
+
+      if (typeof coverpage === 'string' || coverpage === true) {
+        if (url === 'README.md') {
+          name = coverpage === true ? '_coverpage.md' : coverpage
         }
       } else if (Array.isArray(coverpage)) {
-        path = coverpage.indexOf(url) > -1 && '_coverpage.md'
+        name = coverpage.indexOf(url) > -1 && '_coverpage.md'
       } else {
         const cover = coverpage[url]
-        path = cover === true ? '_coverpage.md' : cover
+        name = cover === true ? '_coverpage.md' : cover
       }
 
-      const coverFile = this._getPath(resolve(url, `./${path}`))
+      if (name) {
+        const coverFile = this._getPath(resolvePathname(name, url))
 
-      this._renderHtml('cover', await this._render(coverFile), 'cover')
+        this._renderHtml('cover', await this._render(coverFile, 'cover'))
+      }
     }
 
     const html = this.html
@@ -108,6 +122,7 @@ export default class Renderer {
 
   async _render(path, type) {
     let html = await this._loadFile(path)
+
     const {subMaxLevel, maxLevel} = this.config
     let tokens
 
@@ -126,7 +141,8 @@ export default class Renderer {
         tokens = await new Promise(r => {
           prerenderEmbed(
             {
-              fetch: url => this._loadFile(this._getPath(url)),
+              // Url is absolute path
+              fetch: url => this._loadFile(this._getPath('.' + url)),
               compiler: this.compiler,
               raw: html
             },
@@ -163,7 +179,7 @@ export default class Renderer {
       return content
     } catch (e) {
       this.lock = this.lock || 0
-      if (++this.lock > 10) {
+      if (++this.lock > 4) {
         this.lock = 0
         return
       }

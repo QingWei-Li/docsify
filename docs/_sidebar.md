@@ -23,6 +23,7 @@
   - [Offline Mode(PWA)](pwa.md)
   - [Server-Side Rendering(SSR)](ssr.md)
   - [Embed Files](embed-files.md)
+  - [Generate static html](static.md)
 
 - [Awesome docsify](awesome.md)
 - [Changelog](changelog.md)

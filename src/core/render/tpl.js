@@ -57,16 +57,19 @@ export function main(config) {
 /**
  * Cover Page
  */
-export function cover() {
+export function cover({style, text, hasMask}) {
   const SL = ', 100%, 85%'
-  const bgc =
-    'linear-gradient(to left bottom, ' +
-    `hsl(${Math.floor(Math.random() * 255) + SL}) 0%,` +
-    `hsl(${Math.floor(Math.random() * 255) + SL}) 100%)`
+  style =
+    style ||
+    'background: linear-gradient(to left bottom, ' +
+      `hsl(${Math.floor(Math.random() * 255) + SL}) 0%,` +
+      `hsl(${Math.floor(Math.random() * 255) + SL}) 100%)`
 
   return (
-    `<section class="cover show" style="background: ${bgc}">` +
-    '<div class="cover-main"><!--cover--></div>' +
+    `<section class="cover show ${
+      hasMask ? ' has-mask' : ''
+    }" style="${style}">` +
+    `<div class="cover-main">${text}</div>` +
     '<div class="mask"></div>' +
     '</section>'
   )
@@ -84,7 +87,9 @@ export function tree(toc, tpl = '<ul class="app-sub-sidebar">{inner}</ul>') {
   }
   let innerHTML = ''
   toc.forEach(node => {
-    innerHTML += `<li><a class="section-link" href="${node.slug}">${node.title}</a></li>`
+    innerHTML += `<li><a class="section-link" href="${node.slug}">${
+      node.title
+    }</a></li>`
     if (node.children) {
       innerHTML += tree(node.children, tpl)
     }
@@ -96,6 +101,17 @@ export function helper(className, content) {
   return `<p class="${className}">${content.slice(5).trim()}</p>`
 }
 
+export function newHelper(className, content) {
+  return `<div class="${className}">${content}</div>`
+}
+
 export function theme(color) {
   return `<style>:root{--theme-color: ${color};}</style>`
+}
+
+export function details({open, summary, html}) {
+  return `<details ${open ? 'open=open' : ''}>${
+    summary ? `<summary>${summary}</summary>` : ''
+  }
+  ${html}</details>`
 }

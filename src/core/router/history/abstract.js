@@ -7,7 +7,7 @@ export class AbstractHistory extends History {
     this.mode = 'abstract'
   }
 
-  parse(path) {
+  parse(path = '') {
     let query = ''
 
     const queryIndex = path.indexOf('?')

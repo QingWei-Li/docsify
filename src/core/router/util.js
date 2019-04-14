@@ -46,7 +46,9 @@ export const isAbsolutePath = cached(path => {
 export const getParentPath = cached(path => {
   return /\/$/g.test(path) ?
     path :
-    (path = path.match(/(\S*\/)[^/]+$/)) ? path[1] : ''
+    (path = path.match(/(\S*\/)[^/]+$/)) ?
+      path[1] :
+      ''
 })
 
 export const cleanPath = cached(path => {
