@@ -7,7 +7,16 @@ console.log('[e2e tests] : args passed to live server', args)
 const params = {
   port: args[0] || 3000,
   root: args[1] || fixturePath,
-  open: false
+  open: false,
+  middleware: [
+    function(req, res, next) {
+      if (req.url === '/_media/delayed.md') {
+        setTimeout(next, 250);
+      } else {
+        next();
+      }
+    },
+  ],
   // NoBrowser: true
-}
+};
 LiveServer.start(params)

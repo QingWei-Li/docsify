@@ -23,6 +23,13 @@ const setup = async () => {
   // 1
   const docsPath = path.join(process.cwd(), './docs')
   const fixtureDocsPath = path.join(__dirname, './fixtures/docs')
+  const embeddedFiles = [
+    {
+      tag: '## Tag attribute',
+      srcFile: 'embed-order.md',
+      dstFile: 'embed-files.md',
+    },
+  ];
 
   // 1.1
   console.log('[cypress test docs] Copying the docs --> cypress/fixtures/docs')
@@ -37,6 +44,21 @@ const setup = async () => {
     )
     copyDir.sync(fromPath, toPath)
   })
+
+  // 1.3
+  embeddedFiles.forEach(({ tag, srcFile, dstFile }) => {
+    const content = fs.readFileSync(`${__dirname}/inline/${srcFile}`).toString();
+    const originalFile = `${fixtureDocsPath}/${dstFile}`;
+
+    let originalContent = fs
+      .readFileSync(originalFile)
+      .toString()
+      .split('\n');
+    const tagLine = originalContent.findIndex(l => l.indexOf(tag) >= 0);
+    originalContent.splice(tagLine, 0, content);
+
+    fs.writeFileSync(originalFile, originalContent.join('\n'));
+  });
 
   // 2
   console.log(

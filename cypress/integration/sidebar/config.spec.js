@@ -326,6 +326,7 @@ context('sidebar.configurations', () => {
   const embedFilesIds = [
     'embedded-file-type',
     'embedded-code-fragments',
+    'embedded-file-order',
     'tag-attribute',
     'the-code-block-highlight',
   ];
@@ -336,7 +337,7 @@ context('sidebar.configurations', () => {
       cy.get(`a.section-link[href='#/embed-files?id=${id}']`)
         .click()
         .then(() => {
-          cy.wait(500);
+          cy.wait(750);
           cy.matchImageSnapshot();
         });
     });
