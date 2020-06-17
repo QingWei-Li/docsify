@@ -2,6 +2,7 @@
 .DS_Store
 .idea
 node_modules
+package-lock.json
 themes/
 lib/
 cypress/integration/examples
