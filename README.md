@@ -9,16 +9,31 @@
 </p>
 
 <p align="center">
-  <a href="#backers"><img alt="Backers on Open Collective" src="https://opencollective.com/docsify/backers/badge.svg?style=flat-square"></a>
-  <a href="#sponsors">
-    <img alt="Sponsors on Open Collective" src="https://opencollective.com/docsify/sponsors/badge.svg?style=flat-square"></a> 
-  <a><img src="https://github.com/docsifyjs/docsify/workflows/Unit%20tests%20Suite/badge.svg?branch=develop&amp;event=push" alt="Unit tests Suite"></a>
-  <a><img src="https://github.com/docsifyjs/docsify/workflows/Linting%20Checks/badge.svg?branch=develop&amp;event=push" alt="Linting Checks"></a>
-  <a><img src="https://github.com/docsifyjs/docsify/workflows/Testing%20the%20e2e%20test%20suites/badge.svg?branch=develop&amp;event=push" alt="Testing the e2e test suites"></a>
-  <a href="https://www.npmjs.com/package/docsify"><img alt="npm" src="https://img.shields.io/npm/v/docsify.svg?style=flat-square"></a>
-  <a href="https://github.com/QingWei-Li/donate"><img alt="donate" src="https://img.shields.io/badge/%24-donate-ff69b4.svg?style=flat-square"></a>
-  <a href="https://gitter.im/docsifyjs/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link"><img alt="gitter" src="https://img.shields.io/gitter/room/docsifyjs/docsify.svg?style=flat-square"></a>
-  <a href="https://gitpod.io/#https://github.com/docsifyjs/docsify"><img src="https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod" alt="Gitpod Ready-to-Code"></a>
+  <a href="https://discord.gg/3NwKFyR"><img
+    alt="Join Discord community and chat about Docsify"
+    title="Join Discord community and chat about Docsify"
+    src="https://img.shields.io/discord/713647066802421792.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2&cacheSeconds=60"
+  /></a>
+  <a href="#backers"><img
+    alt="Backers and sponsors on Open Collective"
+    title="Backers and sponsors on Open Collective"
+    src="https://img.shields.io/opencollective/all/docsify?label=supporters&cacheSeconds=86400"
+  /></a>
+  <a href="https://github.com/QingWei-Li/donate"><img
+    alt="Support Docsify development"
+    title="Support Docsify development"
+    src="https://img.shields.io/badge/$-donate-ff69b4.svg"
+  /></a>
+  <a href="https://www.npmjs.com/package/docsify"><img
+    alt="Install Docsify from NPM"
+    title="Install Docsify from NPM"
+    src="https://img.shields.io/npm/v/docsify.svg?&label=&logo=npm&logoColor=ffffff&labelColor=eeeeee&color=cb3837&cacheSeconds=86400"
+  /></a>
+  <a href="https://gitpod.io/#https://github.com/docsifyjs/docsify"><img
+    alt="Contribute to or play around with Docsify on Gitpod"
+    title="Contribute to or play around with Docsify on Gitpod"
+    src="https://img.shields.io/badge/gitpod-gray?logo=gitpod"
+  /></a>
 </p>
 
 <p align="center">Gold Sponsor via <a href="https://opencollective.com/docsify">Open Collective</a></p>
@@ -36,7 +51,7 @@
 - [CLI](https://github.com/docsifyjs/docsify-cli)
 - CDN: [UNPKG](https://unpkg.com/docsify/) | [jsDelivr](https://cdn.jsdelivr.net/npm/docsify/) | [cdnjs](https://cdnjs.com/libraries/docsify)
 - [Awesome docsify](https://github.com/docsifyjs/awesome-docsify)
-- [Community chat](https://gitter.im/docsifyjs/Lobby)
+- [Community chat](https://discord.gg/3NwKFyR)
 
 ## Features
 
@@ -119,6 +134,24 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
 <a href="https://github.com/docsifyjs/docsify/graphs/contributors"><img src="https://opencollective.com/docsify/contributors.svg?width=890" /></a>
+
+## Status
+
+<a href="https://github.com/docsifyjs/docsify/actions?query=workflow%3A%22unit+tests%22"><img
+  alt="Docsify unit test suite"
+  title="Docsify unit test suite"
+  src="https://img.shields.io/github/workflow/status/docsifyjs/docsify/unit tests/develop?label=unit%20tests&cacheSeconds=300"
+/></a>
+<a href="https://github.com/docsifyjs/docsify/actions?query=workflow%3A%22e2e+tests%22"><img
+  alt="Docsify e2e test suites"
+  title="Docsify e2e test suites"
+  src="https://img.shields.io/github/workflow/status/docsifyjs/docsify/e2e tests/develop?label=e2e%20tests&cacheSeconds=300"
+/></a>
+<a href="https://github.com/docsifyjs/docsify/actions?query=workflow%3A%22lint+checks%22"><img
+  alt="Docsify linting checks"
+  title="Docsify linting checks"
+  src="https://img.shields.io/github/workflow/status/docsifyjs/docsify/lint checks/develop?label=lint%20checks&cacheSeconds=300"
+/></a>
 
 ## License
 

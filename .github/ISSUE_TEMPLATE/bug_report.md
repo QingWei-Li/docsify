@@ -7,7 +7,7 @@ about: Create a report to help us improve
 <!-- Please use English language -->
 <!-- Before creating an issue please make sure you are using the latest version of Docsify. -->
 <!-- Please ask questions on StackOverflow: https://stackoverflow.com/questions/ask?tags=docsify -->
-<!-- Please ask questions on gitter: https://gitter.im/docsifyjs/Lobby -->
+<!-- Please ask questions on Discord: https://discord.gg/3NwKFyR -->
 
 ## Bug Report
 

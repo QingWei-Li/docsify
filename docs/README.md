@@ -4,7 +4,7 @@
 
 ## What it is
 
-docsify generates your documentation website on the fly. Unlike GitBook, it does not generate static html files. Instead, it smartly loads and parses your Markdown files and displays them as a website. To start using it, all you need to do is create an `index.html` and [deploy it on GitHub Pages](deploy.md).
+Docsify generates your documentation website on the fly. Unlike GitBook, it does not generate static html files. Instead, it smartly loads and parses your Markdown files and displays them as a website. To start using it, all you need to do is create an `index.html` and [deploy it on GitHub Pages](deploy.md).
 
 See the [Quick start](quickstart.md) guide for more details.
 
@@ -29,4 +29,4 @@ Please consider donating if you think docsify is helpful to you or that my work 
 
 ## Community
 
-Users and the development team are usually in the [Gitter chat room](https://gitter.im/docsifyjs/Lobby).
+Users and the development team are usually in the [Discord server](https://discord.gg/3NwKFyR).
