@@ -57,30 +57,14 @@ module.exports.init = function(
   const dom = initJSDOM(markup);
   dom.reconfigure({ url: 'file:///' + rootPath });
 
-  // Mimic src/core/index.js but for Node.js
-  function Docsify() {
-    this._init();
-  }
-
-  const proto = Docsify.prototype;
-
-  const { initMixin } = require('../src/core/init');
-  const { routerMixin } = require('../src/core//router');
-  const { renderMixin } = require('../src/core//render');
-  const { fetchMixin } = require('../src/core/fetch');
-  const { eventMixin } = require('../src/core//event');
-
-  initMixin(proto);
-  routerMixin(proto);
-  renderMixin(proto);
-  fetchMixin(proto);
-  eventMixin(proto);
+  const { Docsify } = require('../src/core/Docsify');
 
   const NOT_INIT_PATTERN = '<!--main-->';
 
   return new Promise(resolve => {
     ready(() => {
       const docsify = new Docsify();
+
       // NOTE: I was not able to get it working with a callback, but polling works usually at the first time
       const id = setInterval(() => {
         if (

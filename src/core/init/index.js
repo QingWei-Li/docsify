@@ -1,27 +1,24 @@
 import config from '../config';
-import { initRender } from '../render';
-import { initRouter } from '../router';
-import { initEvent } from '../event';
-import { initFetch } from '../fetch';
-import { isFn } from '../util/core';
-import { initLifecycle, callHook } from './lifecycle';
 
-export function initMixin(proto) {
-  proto._init = function() {
-    const vm = this;
-    vm.config = config(vm);
+/**
+ * This class is responsible to initializing all other mixins in a certain
+ * order, and calling lifecycle hooks at appropriate times.
+ */
+export function initMixin(Base = class {}) {
+  return class extends Base {
+    constructor() {
+      super();
 
-    initLifecycle(vm); // Init hooks
-    initPlugin(vm); // Install plugins
-    callHook(vm, 'init');
-    initRouter(vm); // Add router
-    initRender(vm); // Render base DOM
-    initEvent(vm); // Bind events
-    initFetch(vm); // Fetch data
-    callHook(vm, 'mounted');
+      this.config = config(this);
+
+      this.initLifecycle(); // Init hooks
+      this.initPlugin(); // Install plugins
+      this.callHook('init');
+      this.initRouter(); // Add router
+      this.initRender(); // Render base DOM
+      this.initEvent(); // Bind events
+      this.initFetch(); // Fetch data
+      this.callHook('mounted');
+    }
   };
-}
-
-function initPlugin(vm) {
-  [].concat(vm.config.plugins).forEach(fn => isFn(fn) && fn(vm._lifecycle, vm));
 }

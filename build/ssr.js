@@ -1,5 +1,5 @@
 var rollup = require('rollup')
-var buble = require('rollup-plugin-buble')
+var buble = require('@rollup/plugin-buble')
 var async = require('rollup-plugin-async')
 var replace = require('rollup-plugin-replace')
 

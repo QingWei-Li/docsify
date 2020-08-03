@@ -81,7 +81,6 @@ describe('Docsify public API', () => {
         expect(vm.constructor.name).to.equal('Docsify');
         expect(vm.$fetch).to.be.an.instanceof(Function);
         expect(vm.$resetEvents).to.be.an.instanceof(Function);
-        expect(vm.route).to.be.an.instanceof(Object);
 
         window.configFunctionCalled = true;
 

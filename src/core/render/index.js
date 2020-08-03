@@ -3,7 +3,6 @@ import tinydate from 'tinydate';
 import DOMPurify from 'dompurify';
 import * as dom from '../util/dom';
 import cssVars from '../util/polyfill/css-vars';
-import { callHook } from '../init/lifecycle';
 import { getAndActive, sticky } from '../event/sidebar';
 import { getPath, isAbsolutePath } from '../router/util';
 import { isMobile, inBrowser } from '../util/env';
@@ -13,290 +12,302 @@ import { Compiler } from './compiler';
 import * as tpl from './tpl';
 import { prerenderEmbed } from './embed';
 
-function executeScript() {
-  const script = dom
-    .findAll('.markdown-section>script')
-    .filter(s => !/template/.test(s.type))[0];
-  if (!script) {
-    return false;
-  }
+/**
+ * This class is provides methods for rendering the Docsify site content using
+ * the Compiler to convert markdown into HTML. It wires up the Compiler with
+ * the router.
+ */
+export function renderMixin(Base = class {}) {
+  return class extends Base {
+    _executeScript() {
+      const script = dom
+        .findAll('.markdown-section>script')
+        .filter(s => !/template/.test(s.type))[0];
+      if (!script) {
+        return false;
+      }
 
-  const code = script.innerText.trim();
-  if (!code) {
-    return false;
-  }
+      const code = script.innerText.trim();
+      if (!code) {
+        return false;
+      }
 
-  setTimeout(_ => {
-    window.__EXECUTE_RESULT__ = new Function(code)();
-  }, 0);
-}
-
-function formatUpdated(html, updated, fn) {
-  updated =
-    typeof fn === 'function'
-      ? fn(updated)
-      : typeof fn === 'string'
-      ? tinydate(fn)(new Date(updated))
-      : updated;
-
-  return html.replace(/{docsify-updated}/g, updated);
-}
-
-function renderMain(html) {
-  if (!html) {
-    html = '<h1>404 - Not found</h1>';
-  }
-
-  this._renderTo('.markdown-section', html);
-  // Render sidebar with the TOC
-  !this.config.loadSidebar && this._renderSidebar();
-
-  // Execute script
-  if (
-    this.config.executeScript !== false &&
-    typeof window.Vue !== 'undefined' &&
-    !executeScript()
-  ) {
-    setTimeout(_ => {
-      const vueVM = window.__EXECUTE_RESULT__;
-      vueVM && vueVM.$destroy && vueVM.$destroy();
-      window.__EXECUTE_RESULT__ = new window.Vue().$mount('#main');
-    }, 0);
-  } else {
-    this.config.executeScript && executeScript();
-  }
-}
-
-function renderNameLink(vm) {
-  const el = dom.getNode('.app-name-link');
-  const nameLink = vm.config.nameLink;
-  const path = vm.route.path;
-
-  if (!el) {
-    return;
-  }
-
-  if (isPrimitive(vm.config.nameLink)) {
-    el.setAttribute('href', nameLink);
-  } else if (typeof nameLink === 'object') {
-    const match = Object.keys(nameLink).filter(
-      key => path.indexOf(key) > -1
-    )[0];
-
-    el.setAttribute('href', nameLink[match]);
-  }
-}
-
-export function renderMixin(proto) {
-  proto._renderTo = function(el, content, replace) {
-    const node = dom.getNode(el);
-    if (node) {
-      node[replace ? 'outerHTML' : 'innerHTML'] = content;
-    }
-  };
-
-  proto._renderSidebar = function(text) {
-    const { maxLevel, subMaxLevel, loadSidebar, hideSidebar } = this.config;
-
-    if (hideSidebar) {
-      // FIXME : better styling solution
-      document.querySelector('aside.sidebar').remove();
-      document.querySelector('button.sidebar-toggle').remove();
-      document.querySelector('section.content').style.right = 'unset';
-      document.querySelector('section.content').style.left = 'unset';
-      document.querySelector('section.content').style.position = 'relative';
-      document.querySelector('section.content').style.width = '100%';
-      return null;
+      setTimeout(_ => {
+        window.__EXECUTE_RESULT__ = new Function(code)();
+      }, 0);
     }
 
-    this._renderTo('.sidebar-nav', this.compiler.sidebar(text, maxLevel));
-    const activeEl = getAndActive(this.router, '.sidebar-nav', true, true);
-    if (loadSidebar && activeEl) {
-      activeEl.parentNode.innerHTML +=
-        this.compiler.subSidebar(subMaxLevel) || '';
-    } else {
-      // Reset toc
-      this.compiler.subSidebar();
+    _formatUpdated(html, updated, fn) {
+      updated =
+        typeof fn === 'function'
+          ? fn(updated)
+          : typeof fn === 'string'
+          ? tinydate(fn)(new Date(updated))
+          : updated;
+
+      return html.replace(/{docsify-updated}/g, updated);
     }
 
-    // Bind event
-    this._bindEventOnRendered(activeEl);
-  };
+    __renderMain(html) {
+      if (!html) {
+        html = '<h1>404 - Not found</h1>';
+      }
 
-  proto._bindEventOnRendered = function(activeEl) {
-    const { autoHeader } = this.config;
+      this._renderTo('.markdown-section', html);
+      // Render sidebar with the TOC
+      !this.config.loadSidebar && this._renderSidebar();
 
-    scrollActiveSidebar(this.router);
-
-    if (autoHeader && activeEl) {
-      const main = dom.getNode('#main');
-      const firstNode = main.children[0];
-      if (firstNode && firstNode.tagName !== 'H1') {
-        const h1 = this.compiler.header(activeEl.innerText, 1);
-        const wrapper = dom.create('div', h1);
-        dom.before(main, wrapper.children[0]);
+      // Execute script
+      if (
+        this.config.executeScript !== false &&
+        typeof window.Vue !== 'undefined' &&
+        !this._executeScript()
+      ) {
+        setTimeout(_ => {
+          const vueVM = window.__EXECUTE_RESULT__;
+          vueVM && vueVM.$destroy && vueVM.$destroy();
+          window.__EXECUTE_RESULT__ = new window.Vue().$mount('#main');
+        }, 0);
+      } else {
+        this.config.executeScript && this._executeScript();
       }
     }
-  };
 
-  proto._renderNav = function(text) {
-    text && this._renderTo('nav', this.compiler.compile(text));
-    if (this.config.loadNavbar) {
-      getAndActive(this.router, 'nav');
+    _renderNameLink(vm) {
+      const el = dom.getNode('.app-name-link');
+      const nameLink = vm.config.nameLink;
+      const path = vm.route.path;
+
+      if (!el) {
+        return;
+      }
+
+      if (isPrimitive(vm.config.nameLink)) {
+        el.setAttribute('href', nameLink);
+      } else if (typeof nameLink === 'object') {
+        const match = Object.keys(nameLink).filter(
+          key => path.indexOf(key) > -1
+        )[0];
+
+        el.setAttribute('href', nameLink[match]);
+      }
     }
-  };
 
-  proto._renderMain = function(text, opt = {}, next) {
-    if (!text) {
-      return renderMain.call(this, text);
+    _renderTo(el, content, replace) {
+      const node = dom.getNode(el);
+      if (node) {
+        node[replace ? 'outerHTML' : 'innerHTML'] = content;
+      }
     }
 
-    callHook(this, 'beforeEach', text, result => {
-      let html;
-      const callback = () => {
-        if (opt.updatedAt) {
-          html = formatUpdated(html, opt.updatedAt, this.config.formatUpdated);
-        }
+    _renderSidebar(text) {
+      const { maxLevel, subMaxLevel, loadSidebar, hideSidebar } = this.config;
 
-        callHook(this, 'afterEach', html, text => renderMain.call(this, text));
-      };
+      if (hideSidebar) {
+        // FIXME : better styling solution
+        document.querySelector('aside.sidebar').remove();
+        document.querySelector('button.sidebar-toggle').remove();
+        document.querySelector('section.content').style.right = 'unset';
+        document.querySelector('section.content').style.left = 'unset';
+        document.querySelector('section.content').style.position = 'relative';
+        document.querySelector('section.content').style.width = '100%';
+        return null;
+      }
 
-      if (this.isHTML) {
-        html = this.result = text;
-        callback();
-        next();
+      this._renderTo('.sidebar-nav', this.compiler.sidebar(text, maxLevel));
+      const activeEl = getAndActive(this.router, '.sidebar-nav', true, true);
+      if (loadSidebar && activeEl) {
+        activeEl.parentNode.innerHTML +=
+          this.compiler.subSidebar(subMaxLevel) || '';
       } else {
-        prerenderEmbed(
-          {
-            compiler: this.compiler,
-            raw: result,
-          },
-          tokens => {
-            html = this.compiler.compile(tokens);
-            html = this.isRemoteUrl ? DOMPurify.sanitize(html) : html;
-            callback();
-            next();
+        // Reset toc
+        this.compiler.subSidebar();
+      }
+
+      // Bind event
+      this._bindEventOnRendered(activeEl);
+    }
+
+    _bindEventOnRendered(activeEl) {
+      const { autoHeader } = this.config;
+
+      scrollActiveSidebar(this.router);
+
+      if (autoHeader && activeEl) {
+        const main = dom.getNode('#main');
+        const firstNode = main.children[0];
+        if (firstNode && firstNode.tagName !== 'H1') {
+          const h1 = this.compiler.header(activeEl.innerText, 1);
+          const wrapper = dom.create('div', h1);
+          dom.before(main, wrapper.children[0]);
+        }
+      }
+    }
+
+    _renderNav(text) {
+      text && this._renderTo('nav', this.compiler.compile(text));
+      if (this.config.loadNavbar) {
+        getAndActive(this.router, 'nav');
+      }
+    }
+
+    _renderMain(text, opt = {}, next) {
+      if (!text) {
+        return this.__renderMain(text);
+      }
+
+      this.callHook('beforeEach', text, result => {
+        let html;
+        const callback = () => {
+          if (opt.updatedAt) {
+            html = this._formatUpdated(
+              html,
+              opt.updatedAt,
+              this.config.formatUpdated
+            );
           }
-        );
-      }
-    });
-  };
 
-  proto._renderCover = function(text, coverOnly) {
-    const el = dom.getNode('.cover');
+          this.callHook('afterEach', html, text => this.__renderMain(text));
+        };
 
-    dom.toggleClass(
-      dom.getNode('main'),
-      coverOnly ? 'add' : 'remove',
-      'hidden'
-    );
-    if (!text) {
-      dom.toggleClass(el, 'remove', 'show');
-      return;
+        if (this.isHTML) {
+          html = this.result = text;
+          callback();
+          next();
+        } else {
+          prerenderEmbed(
+            {
+              compiler: this.compiler,
+              raw: result,
+            },
+            tokens => {
+              html = this.compiler.compile(tokens);
+              html = this.isRemoteUrl ? DOMPurify.sanitize(html) : html;
+              callback();
+              next();
+            }
+          );
+        }
+      });
     }
 
-    dom.toggleClass(el, 'add', 'show');
+    _renderCover(text, coverOnly) {
+      const el = dom.getNode('.cover');
 
-    let html = this.coverIsHTML ? text : this.compiler.cover(text);
+      dom.toggleClass(
+        dom.getNode('main'),
+        coverOnly ? 'add' : 'remove',
+        'hidden'
+      );
+      if (!text) {
+        dom.toggleClass(el, 'remove', 'show');
+        return;
+      }
 
-    const m = html
-      .trim()
-      .match('<p><img.*?data-origin="(.*?)"[^a]+alt="(.*?)">([^<]*?)</p>$');
+      dom.toggleClass(el, 'add', 'show');
 
-    if (m) {
-      if (m[2] === 'color') {
-        el.style.background = m[1] + (m[3] || '');
-      } else {
-        let path = m[1];
+      let html = this.coverIsHTML ? text : this.compiler.cover(text);
 
-        dom.toggleClass(el, 'add', 'has-mask');
-        if (!isAbsolutePath(m[1])) {
-          path = getPath(this.router.getBasePath(), m[1]);
+      const m = html
+        .trim()
+        .match('<p><img.*?data-origin="(.*?)"[^a]+alt="(.*?)">([^<]*?)</p>$');
+
+      if (m) {
+        if (m[2] === 'color') {
+          el.style.background = m[1] + (m[3] || '');
+        } else {
+          let path = m[1];
+
+          dom.toggleClass(el, 'add', 'has-mask');
+          if (!isAbsolutePath(m[1])) {
+            path = getPath(this.router.getBasePath(), m[1]);
+          }
+
+          el.style.backgroundImage = `url(${path})`;
+          el.style.backgroundSize = 'cover';
+          el.style.backgroundPosition = 'center center';
         }
 
-        el.style.backgroundImage = `url(${path})`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center center';
+        html = html.replace(m[0], '');
       }
 
-      html = html.replace(m[0], '');
+      this._renderTo('.cover-main', html);
+      sticky();
     }
 
-    this._renderTo('.cover-main', html);
-    sticky();
-  };
-
-  proto._updateRender = function() {
-    // Render name link
-    renderNameLink(this);
-  };
-}
-
-export function initRender(vm) {
-  const config = vm.config;
-
-  // Init markdown compiler
-  vm.compiler = new Compiler(config, vm.router);
-  if (inBrowser) {
-    window.__current_docsify_compiler__ = vm.compiler;
-  }
-
-  const id = config.el || '#app';
-  const navEl = dom.find('nav') || dom.create('nav');
-
-  const el = dom.find(id);
-  let html = '';
-  let navAppendToTarget = dom.body;
-
-  if (el) {
-    if (config.repo) {
-      html += tpl.corner(config.repo, config.cornerExternalLinkTarge);
+    _render_updateRender() {
+      // Render name link
+      this._renderNameLink(this);
     }
 
-    if (config.coverpage) {
-      html += tpl.cover();
-    }
+    initRender() {
+      const config = this.config;
 
-    if (config.logo) {
-      const isBase64 = /^data:image/.test(config.logo);
-      const isExternal = /(?:http[s]?:)?\/\//.test(config.logo);
-      const isRelative = /^\./.test(config.logo);
-
-      if (!isBase64 && !isExternal && !isRelative) {
-        config.logo = getPath(vm.router.getBasePath(), config.logo);
+      // Init markdown compiler
+      this.compiler = new Compiler(config, this.router);
+      if (inBrowser) {
+        // TODO @trusktr, get rid of globals!
+        window.__current_docsify_compiler__ = this.compiler;
       }
+
+      const id = config.el || '#app';
+      const navEl = dom.find('nav') || dom.create('nav');
+
+      const el = dom.find(id);
+      let html = '';
+      let navAppendToTarget = dom.body;
+
+      if (el) {
+        if (config.repo) {
+          html += tpl.corner(config.repo, config.cornerExternalLinkTarge);
+        }
+
+        if (config.coverpage) {
+          html += tpl.cover();
+        }
+
+        if (config.logo) {
+          const isBase64 = /^data:image/.test(config.logo);
+          const isExternal = /(?:http[s]?:)?\/\//.test(config.logo);
+          const isRelative = /^\./.test(config.logo);
+
+          if (!isBase64 && !isExternal && !isRelative) {
+            config.logo = getPath(this.router.getBasePath(), config.logo);
+          }
+        }
+
+        html += tpl.main(config);
+        // Render main app
+        this._renderTo(el, html, true);
+      } else {
+        this.rendered = true;
+      }
+
+      if (config.mergeNavbar && isMobile) {
+        navAppendToTarget = dom.find('.sidebar');
+      } else {
+        navEl.classList.add('app-nav');
+
+        if (!config.repo) {
+          navEl.classList.add('no-badge');
+        }
+      }
+
+      // Add nav
+      if (config.loadNavbar) {
+        dom.before(navAppendToTarget, navEl);
+      }
+
+      if (config.themeColor) {
+        dom.$.head.appendChild(
+          dom.create('div', tpl.theme(config.themeColor)).firstElementChild
+        );
+        // Polyfll
+        cssVars(config.themeColor);
+      }
+
+      this._render_updateRender();
+      dom.toggleClass(dom.body, 'ready');
     }
-
-    html += tpl.main(config);
-    // Render main app
-    vm._renderTo(el, html, true);
-  } else {
-    vm.rendered = true;
-  }
-
-  if (config.mergeNavbar && isMobile) {
-    navAppendToTarget = dom.find('.sidebar');
-  } else {
-    navEl.classList.add('app-nav');
-
-    if (!config.repo) {
-      navEl.classList.add('no-badge');
-    }
-  }
-
-  // Add nav
-  if (config.loadNavbar) {
-    dom.before(navAppendToTarget, navEl);
-  }
-
-  if (config.themeColor) {
-    dom.$.head.appendChild(
-      dom.create('div', tpl.theme(config.themeColor)).firstElementChild
-    );
-    // Polyfll
-    cssVars(config.themeColor);
-  }
-
-  vm._updateRender();
-  dom.toggleClass(dom.body, 'ready');
+  };
 }

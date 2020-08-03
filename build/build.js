@@ -1,5 +1,5 @@
 const rollup = require('rollup')
-const buble = require('rollup-plugin-buble')
+const buble = require('@rollup/plugin-buble')
 const commonjs = require('rollup-plugin-commonjs')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const { uglify } = require('rollup-plugin-uglify')

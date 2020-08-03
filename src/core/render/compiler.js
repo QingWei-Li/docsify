@@ -57,6 +57,10 @@ const compileMedia = {
   },
 };
 
+/**
+ * This class compiles the markdown of each page of a Docsify site into HTML
+ * (using some information from the provided router).
+ */
 export class Compiler {
   constructor(config, router) {
     this.config = config;
