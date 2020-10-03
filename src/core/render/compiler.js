@@ -78,7 +78,7 @@ export class Compiler {
       compile = mdConf(marked, renderer);
     } else {
       marked.setOptions(
-        merge(mdConf, {
+        merge({}, mdConf, {
           renderer: merge(renderer, mdConf.renderer),
         })
       );
@@ -305,7 +305,7 @@ export class Compiler {
   subSidebar(level) {
     if (!level) {
       this.toc = [];
-      return;
+      return treeTpl();
     }
 
     const currentPath = this.router.getCurrentPath();

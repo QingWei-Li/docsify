@@ -22,7 +22,7 @@ function loadNested(path, qs, file, next, vm, first) {
 
 function isExternal(url) {
   let match = url.match(
-    /^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/
+    /^([^:/?#]+:)?(?:\/\/([^/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/
   );
   if (
     typeof match[1] === 'string' &&

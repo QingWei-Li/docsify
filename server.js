@@ -23,17 +23,21 @@ if (isSSR) {
     config: {
       name: 'docsify',
       repo: 'docsifyjs/docsify',
-      basePath: 'https://docsify.js.org/',
+      basePath: 'docs/',
+      baseUrl: '/',
       loadNavbar: true,
       loadSidebar: true,
       subMaxLevel: 3,
       auto2top: true,
       alias: {
-        '/de-de/changelog': '/changelog',
-        '/zh-cn/changelog': '/changelog',
-        '/changelog':
-          'https://raw.githubusercontent.com/docsifyjs/docsify/master/CHANGELOG'
-      }
+        '.*?/awesome': 'https://raw.githubusercontent.com/docsifyjs/awesome-docsify/master/README.md',
+        '.*?/changelog': 'https://raw.githubusercontent.com/docsifyjs/docsify/master/CHANGELOG.md',
+        '/.*/_navbar.md': '/_navbar.md',
+        '/zh-cn/(.*)': 'https://cdn.jsdelivr.net/gh/docsifyjs/docs-zh@master/$1',
+        '/de-de/(.*)': 'https://raw.githubusercontent.com/docsifyjs/docs-de/master/$1',
+        '/ru-ru/(.*)': 'https://raw.githubusercontent.com/docsifyjs/docs-ru/master/$1',
+        '/es/(.*)': 'https://raw.githubusercontent.com/docsifyjs/docs-es/master/$1'
+      },
     },
     path: './'
   })

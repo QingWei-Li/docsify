@@ -122,3 +122,40 @@ renderer.renderToString(url)
   .then(html => {})
   .catch(err => {})
 ```
+
+## 3rd Party Frameworks
+
+You can use `docsify-server-renderer` with server frameworks such as `koa` and `express`.
+
+```js
+// The example is in express.js
+var Renderer = require('docsify-server-renderer')
+var readFileSync = require('fs').readFileSync
+var Express = require('express')
+const router = Express.Router()
+
+router.use('', Express.static('./docs/')) // Expose `xxx.md` files, so that url fetch will work
+
+router.get('/:url(.{0,})', async function(req, res, next) { // The `{0,}` is due to express's bug, see http://expressjs.com/en/guide/routing.html#route-parameters
+  var url = req.params.url || ''
+
+  // init
+  var renderer = new Renderer({
+    template: readFileSync('./docs/index.template.html', 'utf-8'),
+    config: {
+      basePath: './docs/',
+      // `basePath` can be either local path or online url.
+      // If local path is used, the following `baseUrl` will be used for url fetch.
+      baseUrl: ''
+    }
+  })
+
+  html = await renderer.renderToString(url)
+  .then(html => html)
+  .catch(() => '')
+
+  res.send(html)
+})
+
+module.exports = router
+```

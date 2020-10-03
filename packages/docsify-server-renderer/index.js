@@ -1,43 +1,34 @@
 import { readFileSync } from 'fs';
-import { resolve, basename } from 'path';
-import resolvePathname from 'resolve-pathname';
+import { resolve as resolvePath, isAbsolute, basename } from 'path';
+import { resolve as resolveUrl } from 'url';
 import fetch from 'node-fetch';
 import debug from 'debug';
 import DOMPurify from 'dompurify';
 import { AbstractHistory } from '../../src/core/router/history/abstract';
 import { Compiler } from '../../src/core/render/compiler';
-import { isAbsolutePath } from '../../src/core/router/util';
+import configHandler from '../../src/core/config';
 import * as tpl from '../../src/core/render/tpl';
 import { prerenderEmbed } from '../../src/core/render/embed';
 
-function cwd(...args) {
-  return resolve(process.cwd(), ...args);
+function resolve(base, ...args) {
+  for (let i in args) {
+    let arg = args[i];
+    if (isExternal(arg)) {
+      return resolveUrl('', ...args);
+    }
+  }
+  if (isExternal(base)) {
+    return resolveUrl(base, ...args);
+  } else if (isAbsolute(base)) {
+    return resolvePath(base, ...args);
+  } else {
+    return resolvePath(process.cwd(), base, ...args);
+  }
 }
 
 function isExternal(url) {
-  let match = url.match(
-    /^([^:\/?#]+:)?(?:\/\/([^\/?#]*))?([^?#]+)?(\?[^#]*)?(#.*)?/
-  );
-  if (
-    typeof match[1] === 'string' &&
-    match[1].length > 0 &&
-    match[1].toLowerCase() !== location.protocol
-  ) {
-    return true;
-  }
-  if (
-    typeof match[2] === 'string' &&
-    match[2].length > 0 &&
-    match[2].replace(
-      new RegExp(
-        ':(' + { 'http:': 80, 'https:': 443 }[location.protocol] + ')?$'
-      ),
-      ''
-    ) !== location.host
-  ) {
-    return true;
-  }
-  return false;
+  let check = /^https?:\/\//gi.test(url);
+  return check;
 }
 
 function mainTpl(config) {
@@ -61,33 +52,29 @@ function mainTpl(config) {
 export default class Renderer {
   constructor({ template, config, cache }) {
     this.html = template;
-    this.config = config = Object.assign({}, config, {
-      routerMode: 'history',
-    });
     this.cache = cache;
+    this.config = config = configHandler(null, config);
 
     this.router = new AbstractHistory(config);
     this.compiler = new Compiler(config, this.router);
 
-    this.router.getCurrentPath = () => this.url;
+    this.basePath = this.router.getBasePath();
+    this.isExternal = isExternal(this.basePath);
+
     this._renderHtml(
       'inject-config',
-      `<script>window.$docsify = ${JSON.stringify(config)}</script>`
+      `<script>window.$docsify = ${JSON.stringify(
+        this._getWebConfig()
+      )}</script>`
     );
     this._renderHtml('inject-app', mainTpl(config));
 
     this.template = this.html;
   }
 
-  _getPath(url) {
-    const file = this.router.getFile(url);
-
-    return isAbsolutePath(file) ? file : cwd(`./${file}`);
-  }
-
   async renderToString(url) {
-    this.url = url = this.router.parse(url).path;
-    this.isRemoteUrl = isExternal(this.url);
+    this.html = this.template;
+    this.url = url = this.router.getFile(url, true);
     const { loadSidebar, loadNavbar, coverpage } = this.config;
 
     const mainFile = this._getPath(url);
@@ -95,13 +82,13 @@ export default class Renderer {
 
     if (loadSidebar) {
       const name = loadSidebar === true ? '_sidebar.md' : loadSidebar;
-      const sidebarFile = this._getPath(resolve(url, `./${name}`));
+      const sidebarFile = this._getPath(name);
       this._renderHtml('sidebar', await this._render(sidebarFile, 'sidebar'));
     }
 
     if (loadNavbar) {
       const name = loadNavbar === true ? '_navbar.md' : loadNavbar;
-      const navbarFile = this._getPath(resolve(url, `./${name}`));
+      const navbarFile = this._getPath(name);
       this._renderHtml('navbar', await this._render(navbarFile, 'navbar'));
     }
 
@@ -118,20 +105,65 @@ export default class Renderer {
         path = cover === true ? '_coverpage.md' : cover;
       }
 
-      const coverFile = this._getPath(resolve(url, `./${path}`));
-
-      this._renderHtml('cover', await this._render(coverFile), 'cover');
+      const coverFile = this._getPath(path);
+      this._renderHtml('cover', await this._render(coverFile, 'cover'));
     }
 
-    const html = this.isRemoteUrl ? DOMPurify.sanitize(this.html) : this.html;
-    this.html = this.template;
+    let html = this.isExternal ? DOMPurify.sanitize(this.html) : this.html;
     return html;
   }
 
-  _renderHtml(match, content) {
-    this.html = this.html.replace(new RegExp(`<!--${match}-->`, 'g'), content);
+  _getWebConfig() {
+    let config = Object.assign({}, this.config);
+    config.routerMode = 'abstract';
 
-    return this.html;
+    if (!this.isExternal) {
+      config.basePath = config.baseUrl;
+      delete config.baseUrl;
+    }
+
+    return config;
+  }
+
+  _getPath(url) {
+    let path = this.router.getFile(url, true);
+    let outPath = resolve(this.basePath, path);
+
+    return outPath;
+  }
+
+  async _loadFile(filePath) {
+    debug('docsify')(`load > ${filePath}`);
+    let content;
+
+    try {
+      if (isExternal(filePath)) {
+        const res = await fetch(filePath);
+        if (!res.ok) {
+          throw Error();
+        }
+
+        content = await res.text();
+        this.lock = 0;
+      } else {
+        filePath = resolve(filePath);
+        content = await readFileSync(filePath, 'utf8');
+        this.lock = 0;
+      }
+
+      return content;
+    } catch (e) {
+      this.lock = this.lock || 0;
+      if (++this.lock > 10) {
+        this.lock = 0;
+        return;
+      }
+
+      const fileName = basename(filePath);
+      const result = await this._loadFile(resolve(filePath, `../${fileName}`));
+
+      return result;
+    }
   }
 
   async _render(path, type) {
@@ -173,38 +205,8 @@ export default class Renderer {
     return html;
   }
 
-  async _loadFile(filePath) {
-    debug('docsify')(`load > ${filePath}`);
-    let content;
-    try {
-      if (isAbsolutePath(filePath)) {
-        const res = await fetch(filePath);
-        if (!res.ok) {
-          throw Error();
-        }
-
-        content = await res.text();
-        this.lock = 0;
-      } else {
-        content = await readFileSync(filePath, 'utf8');
-        this.lock = 0;
-      }
-
-      return content;
-    } catch (e) {
-      this.lock = this.lock || 0;
-      if (++this.lock > 10) {
-        this.lock = 0;
-        return;
-      }
-
-      const fileName = basename(filePath);
-      const result = await this._loadFile(
-        resolvePathname(`../${fileName}`, filePath)
-      );
-
-      return result;
-    }
+  _renderHtml(match, content) {
+    this.html = this.html.replace(new RegExp(`<!--${match}-->`, 'g'), content);
   }
 }
 

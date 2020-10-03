@@ -38,7 +38,8 @@ function walkFetchEmbed({ embedTokens, compile, fetch }, cb) {
 
             // This may contain YAML front matter and will need to be stripped.
             const frontMatterInstalled =
-              ($docsify.frontMatter || {}).installed || false;
+              (((global || window || {}).$docsify || {}).frontMatter || {})
+                .installed || false;
             if (frontMatterInstalled === true) {
               text = $docsify.frontMatter.parseMarkdown(text);
             }
@@ -101,7 +102,7 @@ export function prerenderEmbed({ compiler, raw = '', fetch }, done) {
   const compile = compiler._marked;
   let tokens = compile.lexer(raw);
   const embedTokens = [];
-  const linkRE = compile.Lexer.rules.inline.link;
+  const linkRE = compile.InlineLexer.rules.normal.link;
   const links = tokens.links;
 
   tokens.forEach((token, index) => {

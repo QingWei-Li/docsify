@@ -1,8 +1,9 @@
+import { inBrowser } from './util/env';
 import { merge, hyphenate, isPrimitive, hasOwn } from './util/core';
 
 const currentScript = document.currentScript;
 
-export default function(vm) {
+export default function(vm, ssrConf = {}) {
   const config = merge(
     {
       el: '#app',
@@ -17,7 +18,7 @@ export default function(vm) {
       auto2top: false,
       name: '',
       themeColor: '',
-      nameLink: window.location.pathname,
+      nameLink: inBrowser ? window.location.pathname : '',
       autoHeader: false,
       executeScript: null,
       noEmoji: false,
@@ -36,24 +37,28 @@ export default function(vm) {
       relativePath: false,
       topMargin: 0,
     },
-    typeof window.$docsify === 'function'
-      ? window.$docsify(vm)
-      : window.$docsify
+    inBrowser
+      ? typeof window.$docsify === 'function'
+        ? window.$docsify(vm)
+        : window.$docsify
+      : ssrConf
   );
 
-  const script =
-    currentScript ||
-    [].slice
-      .call(document.getElementsByTagName('script'))
-      .filter(n => /docsify\./.test(n.src))[0];
+  if (inBrowser) {
+    const script =
+      currentScript ||
+      [].slice
+        .call(document.getElementsByTagName('script'))
+        .filter(n => /docsify\./.test(n.src))[0];
 
-  if (script) {
-    for (const prop in config) {
-      if (hasOwn.call(config, prop)) {
-        const val = script.getAttribute('data-' + hyphenate(prop));
+    if (script) {
+      for (const prop in config) {
+        if (hasOwn.call(config, prop)) {
+          const val = script.getAttribute('data-' + hyphenate(prop));
 
-        if (isPrimitive(val)) {
-          config[prop] = val === '' ? true : val;
+          if (isPrimitive(val)) {
+            config[prop] = val === '' ? true : val;
+          }
         }
       }
     }
@@ -79,7 +84,9 @@ export default function(vm) {
     config.name = '';
   }
 
-  window.$docsify = config;
+  if (inBrowser) {
+    window.$docsify = config;
+  }
 
   return config;
 }

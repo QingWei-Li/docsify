@@ -65,7 +65,7 @@ export class History {
 
   parse() {}
 
-  toURL(path, params, currentRoute) {
+  toURL(path = '', params = {}, currentRoute = '') {
     const local = currentRoute && path[0] === '#';
     const route = this.parse(replaceSlug(path));
 
