@@ -85,8 +85,11 @@ export function fetchMixin(proto) {
     return path404;
   };
 
-  proto._loadSideAndNav = function(path, qs, loadSidebar, cb) {
+  proto._loadSideAndNav = function(path, qs, loadSidebar, hideSidebar, cb) {
     return () => {
+      if (hideSidebar) {
+        return;
+      }
       if (!loadSidebar) {
         return cb();
       }
@@ -104,7 +107,12 @@ export function fetchMixin(proto) {
   proto._fetch = function(cb = noop) {
     const { path, query } = this.route;
     const qs = stringifyQuery(query, ['id']);
-    const { loadNavbar, requestHeaders, loadSidebar } = this.config;
+    const {
+      loadNavbar,
+      requestHeaders,
+      loadSidebar,
+      hideSidebar,
+    } = this.config;
     // Abort last request
 
     const file = this.router.getFile(path);
@@ -120,7 +128,7 @@ export function fetchMixin(proto) {
         this._renderMain(
           text,
           opt,
-          this._loadSideAndNav(path, qs, loadSidebar, cb)
+          this._loadSideAndNav(path, qs, loadSidebar, hideSidebar, cb)
         ),
       _ => {
         this._fetchFallbackPage(path, qs, cb) || this._fetch404(file, qs, cb);
@@ -197,7 +205,12 @@ export function fetchMixin(proto) {
   };
 
   proto._fetchFallbackPage = function(path, qs, cb = noop) {
-    const { requestHeaders, fallbackLanguages, loadSidebar } = this.config;
+    const {
+      requestHeaders,
+      fallbackLanguages,
+      loadSidebar,
+      hideSidebar,
+    } = this.config;
 
     if (!fallbackLanguages) {
       return false;
@@ -219,7 +232,7 @@ export function fetchMixin(proto) {
         this._renderMain(
           text,
           opt,
-          this._loadSideAndNav(path, qs, loadSidebar, cb)
+          this._loadSideAndNav(path, qs, loadSidebar, hideSidebar, cb)
         ),
       () => this._fetch404(path, qs, cb)
     );
@@ -255,7 +268,7 @@ export function fetchMixin(proto) {
 }
 
 export function initFetch(vm) {
-  const { loadSidebar } = vm.config;
+  const { loadSidebar, hideSidebar } = vm.config;
 
   // Server-Side Rendering
   if (vm.rendered) {
@@ -264,7 +277,7 @@ export function initFetch(vm) {
       activeEl.parentNode.innerHTML += window.__SUB_SIDEBAR__;
     }
 
-    vm._bindEventOnRendered(activeEl);
+    !hideSidebar && vm._bindEventOnRendered(activeEl);
     vm.$resetEvents();
     callHook(vm, 'doneEach');
     callHook(vm, 'ready');

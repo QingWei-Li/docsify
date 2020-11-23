@@ -11,6 +11,7 @@ export default function(vm) {
       subMaxLevel: 0,
       loadSidebar: null,
       loadNavbar: null,
+      hideSidebar: false,
       homepage: 'README.md',
       coverpage: '',
       basePath: '',

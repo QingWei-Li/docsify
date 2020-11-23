@@ -14,6 +14,11 @@ const CONFIG = {
 };
 
 const install = function(hook, vm) {
+  // Fix the CI, see 1396
+  // No sidebar, no search
+  if (vm.config.hideSidebar) {
+    return;
+  }
   const { util } = Docsify;
   const opts = vm.config.search || CONFIG;
 

@@ -48,7 +48,7 @@ function renderMain(html) {
   this._renderTo('.markdown-section', html);
 
   // Render sidebar with the TOC
-  !this.config.loadSidebar && this._renderSidebar();
+  !this.config.hideSidebar && !this.config.loadSidebar && this._renderSidebar();
 
   // Execute markdown <script>
   if (
@@ -128,18 +128,7 @@ export function renderMixin(proto) {
   };
 
   proto._renderSidebar = function(text) {
-    const { maxLevel, subMaxLevel, loadSidebar, hideSidebar } = this.config;
-
-    if (hideSidebar) {
-      // FIXME : better styling solution
-      document.querySelector('aside.sidebar').remove();
-      document.querySelector('button.sidebar-toggle').remove();
-      document.querySelector('section.content').style.right = 'unset';
-      document.querySelector('section.content').style.left = 'unset';
-      document.querySelector('section.content').style.position = 'relative';
-      document.querySelector('section.content').style.width = '100%';
-      return null;
-    }
+    const { maxLevel, subMaxLevel, loadSidebar } = this.config;
 
     this._renderTo('.sidebar-nav', this.compiler.sidebar(text, maxLevel));
     const activeEl = getAndActive(this.router, '.sidebar-nav', true, true);

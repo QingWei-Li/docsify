@@ -108,9 +108,10 @@ window.$docsify = {
 ## hideSidebar
 
 - Type : `Boolean`
-- Default: `true`
+- Default: `false`
 
-This option will completely hide your sidebar and won't render any content on the side.
+This option will completely hide your sidebar and won't render any content on the side.  
+Meanwhile, the search plugin won't work either. 
 
 ```js
 window.$docsify = {

@@ -51,7 +51,8 @@ export function main(config) {
     '<div class="sidebar-nav"><!--sidebar--></div>' +
     '</aside>';
   return (
-    `<main>${aside}` +
+    '<main>' +
+    (!config.hideSidebar ? `${aside}` : '') +
     '<section class="content">' +
     '<article class="markdown-section" id="main"><!--main--></article>' +
     '</section>' +
