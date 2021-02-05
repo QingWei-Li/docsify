@@ -330,7 +330,10 @@ export function renderMixin(proto) {
           },
           tokens => {
             html = this.compiler.compile(tokens);
-            html = this.isRemoteUrl ? DOMPurify.sanitize(html) : html;
+            // add "target" attribute to DOMPurify white list to handle external links
+            html = this.isRemoteUrl
+              ? DOMPurify.sanitize(html, { ADD_ATTR: ['target'] })
+              : html;
             callback();
             next();
           }
