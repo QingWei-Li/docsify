@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "dompurify": "^2.2.6",
-    "marked": "^1.2.9",
+    "marked": "^2.0.0",
     "medium-zoom": "^1.0.6",
     "opencollective-postinstall": "^2.0.2",
     "prismjs": "^1.23.0",
