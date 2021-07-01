@@ -63,7 +63,13 @@ function walkFetchEmbed({ embedTokens, compile, fetch }, cb) {
             );
           } else if (token.embed.type === 'mermaid') {
             embedToken = [
-              { type: 'html', text: `<div class="mermaid">\n${text}\n</div>` },
+              {
+                type: 'html',
+                text: `<div class="mermaid">\n${text
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/"/g, '&quot;')}\n</div>`,
+              },
             ];
             embedToken.links = {};
           } else {
