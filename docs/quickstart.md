@@ -81,7 +81,7 @@ If you prefer to lock docsify to a specific version, specify the full version af
 
 ### Manually preview your site
 
-If you installed python on your system, you can easily use it to run a static server to preview your site.
+If you have Python installed on your system, you can easily use it to run a static server to preview your site.
 
 ```python2
 cd docs && python -m SimpleHTTPServer 3000
@@ -100,7 +100,7 @@ If you want, you can show a loading dialog before docsify starts to render your 
 <div id="app">Please wait...</div>
 ```
 
-You should set the `data-app` attribute if you changed `el`:
+By default, the `id` attribute of the main container is `app`. If you want to use a different id, you must also set the `data-app` attribute, and [configure](configuration.md#el) the `el` parameter accordingly:
 
 ```html
 <!-- index.html -->
@@ -113,5 +113,3 @@ You should set the `data-app` attribute if you changed `el`:
     }
   </script>
 ```
-
-Compare [el configuration](configuration.md#el).
