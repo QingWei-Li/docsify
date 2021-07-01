@@ -6,6 +6,12 @@ It is recommended to install `docsify-cli` globally, which helps initializing an
 npm i docsify-cli -g
 ```
 
+or
+
+```bash
+yarn global add docsify-cli
+```
+
 ## Initialize
 
 If you want to write the documentation in the `./docs` subdirectory, you can use the `init` command.
