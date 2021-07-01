@@ -18,9 +18,21 @@ window.$docsify = {
         return content;
       });
 
+      hook.beforeEmbed(function(tokens, next) {
+        // Invoked each time after parsing the Markdown file, but before embedding is applied to the token list.
+        // ...
+        next(tokens);
+      });
+      
+      hook.afterEmbed(function(tokens, next) {
+        // Invoked each time after parsing the Markdown file, and after embedding is applied to the token list.
+        // ...
+        next(tokens);
+      });
+
       hook.afterEach(function(html, next) {
-        // Invoked each time after the Markdown file is parsed.
-        // beforeEach and afterEach support asynchronous。
+        // Invoked each time after the Markdown file is parsed and the result HTML is generated.
+        // beforeEach, beforeEmbed, afterEmbed and afterEach support asynchronous。
         // ...
         // call `next(html)` when task is done.
         next(html);

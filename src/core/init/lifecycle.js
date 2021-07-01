@@ -5,6 +5,8 @@ export function initLifecycle(vm) {
     'init',
     'mounted',
     'beforeEach',
+    'beforeEmbed',
+    'afterEmbed',
     'afterEach',
     'doneEach',
     'ready',

@@ -91,7 +91,10 @@ function walkFetchEmbed({ embedTokens, compile, fetch }, cb) {
   }
 }
 
-export function prerenderEmbed({ compiler, raw = '', fetch }, done) {
+export function prerenderEmbed(
+  { compiler, raw = '', fetch, beforeEmbed },
+  done
+) {
   let hit = cached[raw];
   if (hit) {
     const copy = hit.slice();
@@ -100,56 +103,61 @@ export function prerenderEmbed({ compiler, raw = '', fetch }, done) {
   }
 
   const compile = compiler._marked;
-  let tokens = compile.lexer(raw);
-  const embedTokens = [];
-  const linkRE = compile.Lexer.rules.inline.link;
-  const links = tokens.links;
 
-  tokens.forEach((token, index) => {
-    if (token.type === 'paragraph') {
-      token.text = token.text.replace(
-        new RegExp(linkRE.source, 'g'),
-        (src, filename, href, title) => {
-          const embed = compiler.compileEmbed(href, title);
+  if (!beforeEmbed) {
+    beforeEmbed = (tokens, done) => done(tokens);
+  } // noop
+  beforeEmbed(compile.lexer(raw), tokens => {
+    const embedTokens = [];
+    const linkRE = compile.Lexer.rules.inline.link;
+    const links = tokens.links;
 
-          if (embed) {
-            embedTokens.push({
-              index,
-              embed,
-            });
+    tokens.forEach((token, index) => {
+      if (token.type === 'paragraph') {
+        token.text = token.text.replace(
+          new RegExp(linkRE.source, 'g'),
+          (src, filename, href, title) => {
+            const embed = compiler.compileEmbed(href, title);
+
+            if (embed) {
+              embedTokens.push({
+                index,
+                embed,
+              });
+            }
+
+            return src;
           }
+        );
+      }
+    });
 
-          return src;
-        }
-      );
-    }
-  });
+    // keep track of which tokens have been embedded so far
+    // so that we know where to insert the embedded tokens as they
+    // are returned
+    const moves = [];
+    walkFetchEmbed({ compile, embedTokens, fetch }, ({ embedToken, token }) => {
+      if (token) {
+        // iterate through the array of previously inserted tokens
+        // to determine where the current embedded tokens should be inserted
+        let index = token.index;
+        moves.forEach(pos => {
+          if (index > pos.start) {
+            index += pos.length;
+          }
+        });
 
-  // keep track of which tokens have been embedded so far
-  // so that we know where to insert the embedded tokens as they
-  // are returned
-  const moves = [];
-  walkFetchEmbed({ compile, embedTokens, fetch }, ({ embedToken, token }) => {
-    if (token) {
-      // iterate through the array of previously inserted tokens
-      // to determine where the current embedded tokens should be inserted
-      let index = token.index;
-      moves.forEach(pos => {
-        if (index > pos.start) {
-          index += pos.length;
-        }
-      });
+        merge(links, embedToken.links);
 
-      merge(links, embedToken.links);
-
-      tokens = tokens
-        .slice(0, index)
-        .concat(embedToken, tokens.slice(index + 1));
-      moves.push({ start: index, length: embedToken.length - 1 });
-    } else {
-      cached[raw] = tokens.concat();
-      tokens.links = cached[raw].links = links;
-      done(tokens);
-    }
+        tokens = tokens
+          .slice(0, index)
+          .concat(embedToken, tokens.slice(index + 1));
+        moves.push({ start: index, length: embedToken.length - 1 });
+      } else {
+        cached[raw] = tokens.concat();
+        tokens.links = cached[raw].links = links;
+        done(tokens);
+      }
+    });
   });
 }
