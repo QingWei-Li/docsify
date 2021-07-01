@@ -34,6 +34,10 @@ export const imageCompiler = ({ renderer, contentBase, router }) =>
       attrs.push(`id="${config.id}"`);
     }
 
+    if (config.loading) {
+      attrs.push(`loading="${config.loading}"`);
+    }
+
     if (!isAbsolutePath(href)) {
       url = getPath(contentBase, getParentPath(router.getCurrentPath()), href);
     }
