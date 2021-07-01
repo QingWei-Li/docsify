@@ -1,0 +1,27 @@
+# TODO: LIGHTHOUSE-CI-ACTION
+name: Lighthouse CI
+on: [push]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+    - run: npm install && npm install -g @lhci/cli@0.4.x
+    - run: npm run build
+    - run: lhci autorun --upload.target=temporary-public-storage
+    - name: Audit URL's using Lighthouse
+      uses: treosh/lighthouse-ci-action@v3
+      with:
+        node-version: 10.x
+        outputDirectory: /tmp/artifacts
+        urls: 'https://docsify.js.org/#/' # URL to audit using Lighthouse
+        budgetPath: .budget.json # test performance budgets
+        uploadArtifacts: true # save results as an action artifacts
+        temporaryPublicStorage: true # upload whitehouse report to the temporary storage
+    - name: Upload artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: Lighthouse reports
+        path: /tmp/artifacts
