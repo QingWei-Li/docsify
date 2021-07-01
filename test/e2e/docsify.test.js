@@ -5,6 +5,34 @@ const docsifyInit = require('../helpers/docsify-init');
 describe('Docsify', function() {
   // Tests
   // ---------------------------------------------------------------------------
+  it('global APIs are available', async () => {
+    await docsifyInit();
+
+    // If the script was built successfully for production, then it should load
+    // and the following APIs should be available:
+    expect(await page.evaluate(() => typeof window.Docsify)).toEqual('object');
+    expect(await page.evaluate(() => typeof window.Docsify.util)).toEqual(
+      'object'
+    );
+    expect(await page.evaluate(() => typeof window.Docsify.dom)).toEqual(
+      'object'
+    );
+    expect(await page.evaluate(() => typeof window.Docsify.get)).toEqual(
+      'function'
+    );
+    expect(await page.evaluate(() => typeof window.Docsify.slugify)).toEqual(
+      'function'
+    );
+    expect(await page.evaluate(() => typeof window.Docsify.version)).toEqual(
+      'string'
+    );
+    expect(await page.evaluate(() => typeof window.DocsifyCompiler)).toEqual(
+      'function'
+    );
+    expect(await page.evaluate(() => typeof window.marked)).toEqual('function');
+    expect(await page.evaluate(() => typeof window.Prism)).toEqual('object');
+  });
+
   test('allows $docsify configuration to be a function', async () => {
     const testConfig = jest.fn(vm => {
       expect(vm).toBeInstanceOf(Object);

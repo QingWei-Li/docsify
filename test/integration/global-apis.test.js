@@ -2,10 +2,10 @@ import initGlobalAPI from '../../src/core/global-api.js';
 
 // Suite
 // -----------------------------------------------------------------------------
-describe('Global APIs', function() {
+describe('initGlobalAPI', function() {
   // Tests
   // ---------------------------------------------------------------------------
-  test('APIs are available', () => {
+  test('it makes Docsify APIs available globally', () => {
     initGlobalAPI();
 
     expect(typeof window.Docsify).toEqual('object');
