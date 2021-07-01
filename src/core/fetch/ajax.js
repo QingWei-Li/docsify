@@ -30,6 +30,7 @@ export function get(url, hasBar = false, headers = {}) {
     }
   }
 
+  xhr.withCredentials = true;
   xhr.send();
 
   return {
