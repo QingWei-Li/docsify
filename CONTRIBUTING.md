@@ -15,9 +15,39 @@ We welcome any type of contribution, not only code. You can help with
 
 Working on your first Pull Request? You can learn how from this *free* series, [How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github).
 
+### Developing
+
+After cloning the project, run the following in your terminal
+
+```sh
+npm install
+npm run build
+npx serve .
+```
+
+The third command will output a URL like `http://localhost:5000`. Open it in your browser, then you'll see a directory listing. Click on the `docs/` folder and you'll then see the Docsify documentation (built with Docsify of course!) running locally on your computer.
+
+Any time you change the code, you can re-run `npm run build` to compile the code again, then refresh your browser to see the new changes.
+
+TO make things more streamlined, run
+
+```sh
+npm run dev
+```
+
+in a separate terminal from where you are running `npx serve .` and it will enter watch mode, so any time you modify the code it will automatically re-build without you having to manually run `npm run build` each time.
+
+As you make changes to the code, also update the test files in the `test/unit/` folder for unit tests. If needed also update the end-to-end integration tests in `cypress/integration/`.
+
+Sometimes the fake DOM APIs that are available in the unit tests (thanks to JSDOM) are enough to test your code, but in other cases you might want to use real DOM APIs in which case you can use the integration testing for this (runs your code in an actual browser environment instead of Node.js). Integration tests are also useful for taking snapshots of the website to ensure that the pixels look as expected.
+
+### Code structure and architecture
+
+### Dev tips
+
 ## Submitting code
 
-Any code change should be submitted as a pull request. The description should explain what the code does and give steps to execute it. The pull request should also contain tests.
+Once you're happy with your code changes, the changes can be submitted back to the project as a pull request. The pull request description should explain what the changes do. There will be a template to fill out when you create a pull request.
 
 ## Code review process
 
