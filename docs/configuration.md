@@ -88,6 +88,19 @@ window.$docsify = {
 };
 ```
 
+## nav_el
+
+- Type: `String`
+- Default: `null`
+
+The DOM element to use for rendering the navbar. It can be a CSS selector string or an actual [HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement).  If `null`, the first `<nav>` element on the page is used. If it doesn't exist, it is created at the top of the DOM.
+
+```js
+window.$docsify = {
+  nav_el: '#navbar,
+};
+```
+
 ## loadSidebar
 
 - Type: `Boolean|String`
